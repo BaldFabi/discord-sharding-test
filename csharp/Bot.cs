@@ -1,4 +1,4 @@
-using ShardingBot.Handlers;
+using ShardingBot.Services;
 
 using Discord;
 using Discord.Commands;
@@ -42,10 +42,24 @@ namespace ShardingBot
         private void RegisterClientEvents()
         {
             _botClient.ShardReady += OnShardReady;
-            _botClient.ShardConnected += OnShardConnected;
             _botClient.Log += OnClientLog;
         }
 
+        private async void AddGlobalCommands(DiscordSocketClient guildClient)
+        {
+            var globalCommand = new SlashCommandBuilder()
+            {
+                Name = "slash-ping",
+                Description = "Simple \"Ping-Pong\" lash-command",
+            };
+
+            await guildClient.CreateGlobalApplicationCommandAsync(globalCommand.Build());
+        }
+
+        private void RegisterSlashCommandEvents(DiscordSocketClient guildClient)
+        {
+            guildClient.SlashCommandExecuted += OnSlashCommandExecuted;
+        }
 
         #endregion
 
@@ -53,18 +67,27 @@ namespace ShardingBot
 
         private Task OnShardReady(DiscordSocketClient arg)
         {
-            throw new NotImplementedException();
-        }
+            AddGlobalCommands(arg);
+            RegisterSlashCommandEvents(arg);
 
-        private Task OnShardConnected(DiscordSocketClient arg)
-        {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         private Task OnClientLog(LogMessage arg)
         {
             Console.WriteLine(arg.ToString());
+
             return Task.CompletedTask;
+        }
+
+        private async Task OnSlashCommandExecuted(SocketSlashCommand command)
+        {
+            switch (command.CommandName)
+            {
+                case "slash-ping":
+                    await command.RespondAsync("slash-pong!");
+                    break;
+            }
         }
 
         #endregion

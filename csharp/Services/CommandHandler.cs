@@ -1,11 +1,12 @@
 using System.Reflection;
 
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
 
 
-namespace ShardingBot.Handlers
+namespace ShardingBot.Services
 {
     public class CommandHandler
     {
